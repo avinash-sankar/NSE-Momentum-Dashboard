@@ -174,17 +174,17 @@ from data_manager import is_market_open
 market_status = is_market_open()
 
 if not market_status:
-    st.sidebar.warning("🌙 Market is currently CLOSED (NSE: 9:15-15:30 IST)")
+    st.sidebar.warning("🌙 Market is CLOSED (NSE: 9:15-15:30 IST)")
+    st.sidebar.info("💡 Showing data from the last available trading session.")
 else:
-    st.sidebar.success("☀️ Market is currently OPEN")
+    st.sidebar.success("☀️ Market is OPEN")
 
-# Trigger scan only on manual button click
-if force_refresh:
-    if not market_status and not force_refresh:
-        # Silently skip auto-refresh if market is closed
-        pass
-    elif not selected_ranges:
-        st.warning("Please select at least one price range in the sidebar.")
+# Trigger scan on manual button click OR initial load
+is_initial_load = 'momentum_stocks' not in st.session_state
+if force_refresh or is_initial_load:
+    if not selected_ranges:
+        if force_refresh:
+            st.warning("Please select at least one price range in the sidebar.")
     else:
         with st.spinner(f"Filtering {len(st.session_state.all_symbols)} stocks by price..."):
             # Step 1: Pre-filter symbols by price

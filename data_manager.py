@@ -58,12 +58,14 @@ def get_symbols_in_price_ranges(symbols, selected_ranges):
         batch = symbols[i : i + batch_size]
         try:
             t = Ticker(batch, asynchronous=True)
-            data = t.history(period='1d')
+            # Use 5d to ensure we get data even if market is closed or it's a Monday morning
+            data = t.history(period='5d')
             
             if data.empty:
                 continue
                 
             for symbol, ticker_data in data.groupby(level=0):
+                ticker_data = ticker_data.dropna(subset=['close'])
                 if not ticker_data.empty:
                     # Current price is the last 'close'
                     price = ticker_data['close'].iloc[-1]
@@ -103,13 +105,21 @@ def fetch_stock_changes(symbols, threshold=5.0, window_mins=15, use_open_price=F
             batch = symbols[i : i + batch_size]
             try:
                 t = Ticker(batch, asynchronous=True)
-                data = t.history(period='1d')
+                # Fetch 5d to handle off-hours and weekends reliably
+                data = t.history(period='5d')
                 if data.empty: continue
                 
                 for symbol, ticker_data in data.groupby(level=0):
+                    ticker_data = ticker_data.dropna(subset=['open', 'close'])
                     if not ticker_data.empty:
-                        opened = ticker_data['open'].iloc[0]
-                        current = ticker_data['close'].iloc[-1]
+                        # Find the unique dates in the index to identify sessions
+                        # Assuming index is [symbol, date] for daily period
+                        dates = ticker_data.index.get_level_values(1).unique()
+                        latest_date = dates[-1]
+                        session_data = ticker_data.loc[(slice(None), latest_date), :]
+                        
+                        opened = session_data['open'].iloc[0]
+                        current = session_data['close'].iloc[-1]
                         
                         if pd.isna(current) or pd.isna(opened) or opened == 0: continue
                         pct_change = ((current - opened) / opened) * 100
@@ -128,7 +138,8 @@ def fetch_stock_changes(symbols, threshold=5.0, window_mins=15, use_open_price=F
             batch = symbols[i : i + batch_size]
             try:
                 t = Ticker(batch, asynchronous=True)
-                data = t.history(period='1d', interval='1m')
+                # Fetch 5d for 1m interval to ensure overlap with last full session
+                data = t.history(period='5d', interval='1m')
                 if data.empty: continue
                 for symbol, ticker_data in data.groupby(level=0):
                     try:
