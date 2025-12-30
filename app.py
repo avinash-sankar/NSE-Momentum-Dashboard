@@ -5,10 +5,10 @@ from data_manager import get_nse_symbols, fetch_stock_changes, get_symbols_in_pr
 
 # Page configuration
 st.set_page_config(
-    page_title="Refined NSE Momentum Dashboard",
+    page_title="Equity Momentum Dashboard",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 # Custom CSS for Premium Look and Button Visibility
@@ -67,6 +67,30 @@ st.markdown("""
     .stSlider label {
         font-weight: 600 !important;
         font-size: 1.1rem !important;
+    }
+
+    /* Media Queries for Android/Mobile Optimization */
+    @media (max-width: 768px) {
+        .stTitle { font-size: 1.8rem !important; }
+        .stSubheader { font-size: 1.1rem !important; }
+        
+        /* Larger touch targets for +/- and Preset buttons in sidebar */
+        [data-testid="stSidebar"] button {
+            height: 50px !important;
+            font-size: 1.1rem !important;
+        }
+        
+        /* Adjust metric cards for vertical stacking and readability */
+        [data-testid="stMetric"] {
+            padding: 15px !important;
+            margin-bottom: 8px !important;
+        }
+        
+        /* Make sidebar checkboxes easier to click */
+        [data-testid="stSidebar"] div[data-testid="stCheckbox"] label {
+            padding: 10px 0 !important;
+            font-size: 1.1rem !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
