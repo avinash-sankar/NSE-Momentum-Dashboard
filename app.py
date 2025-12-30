@@ -160,7 +160,7 @@ if 'all_symbols' not in st.session_state:
         st.session_state.all_symbols = get_nse_symbols()
 
 title_suffix = "since market open" if use_open_price else f"over {time_display}"
-st.title("📈 Momentum Dashboard")
+st.title("📈 Equity Momentum Dashboard")
 st.subheader(f"Scanning stocks for greater than {st.session_state.threshold} % change {title_suffix}")
 
 # Trigger Scan logic
